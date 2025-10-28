@@ -1,0 +1,481 @@
+/* --- 變數定義 --- */
+:root {
+    --font-main: 'Nunito', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    
+    /* 【美觀更新】 主色調改為更柔和的米白/淺灰 */
+    --color-bg: #eef0f4; /* 淺米灰 */
+    --color-bg-dark: #d9dce1;
+    --color-text: #5b6271;
+    --color-text-light: #9ea8ba;
+    --color-white: #ffffff;
+
+    /* 玩家顏色 (保持不變) */
+    --p1-color: #3498db;
+    --p1-bg: #eaf3fa;
+    --p2-color: #e74c3c;
+    --p2-bg: #fdf5f4;
+    --p3-color: #2ecc71;
+    --p3-bg: #f3fcf7;
+    --p4-color: #9b59b6;
+    --p4-bg: #f9f5fb;
+    
+    --btn-primary: var(--p1-color);
+    --btn-success: var(--p3-color);
+    --btn-danger: var(--p2-color);
+
+    /* 【美觀更新】 新擬態陰影 */
+    /* 參考: https://neumorphism.io/ */
+    --shadow-distance: 6px;
+    --shadow-blur: 12px;
+    --shadow-color-light: rgba(255, 255, 255, 0.9);
+    --shadow-color-dark: rgba(163, 177, 198, 0.6);
+    
+    /* 浮雕/凸起 陰影 */
+    --shadow-neumorphic: 
+        var(--shadow-distance) var(--shadow-distance) var(--shadow-blur) var(--shadow-color-dark),
+        calc(var(--shadow-distance) * -1) calc(var(--shadow-distance) * -1) var(--shadow-blur) var(--shadow-color-light);
+        
+    /* 內凹/凹陷 陰影 */
+    --shadow-inset: 
+        inset var(--shadow-distance) var(--shadow-distance) var(--shadow-blur) var(--shadow-color-dark),
+        inset calc(var(--shadow-distance) * -1) calc(var(--shadow-distance) * -1) var(--shadow-blur) var(--shadow-color-light);
+
+    /* 【美觀更新】 柔和過渡 */
+    --transition-fast: all 0.15s ease-out;
+}
+
+/* --- 動畫定義 (相同) --- */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes modalFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes scorePulse {
+    0% { transform: scale(1); } 
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+@keyframes animatedGradient {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+
+/* --- 基礎樣式 --- */
+* {
+    box-sizing: border-box;
+}
+
+/* 【美觀更新】 Body 背景 */
+body {
+    font-family: var(--font-main);
+    background-color: var(--color-bg); /* 使用純色背景來凸顯擬態 */
+    color: var(--color-text);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    padding: 20px 5px; /* 左右邊距 5px */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* 【美觀更新】 H1 標題 */
+h1 {
+    font-size: 2.5rem; /* 縮小字體 */
+    font-weight: 700;
+    /* 【美觀更新】 改為柔和的文字陰影 */
+    color: var(--color-text);
+    text-shadow: 1px 1px 2px var(--shadow-color-light); 
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* 【美觀更新】 主容器 (Soft UI) */
+#game-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    width: 100%;
+    max-width: 750px; 
+    
+    /* 【美觀更新】 移除玻璃效果, 改為 Soft UI */
+    background-color: var(--color-bg);
+    padding: 15px; /* 邊距縮小 */
+    border-radius: 20px;
+    
+    /* 【美觀更新】 套用 Soft UI 浮雕陰影 */
+    box-shadow: var(--shadow-neumorphic);
+    
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    animation: fadeIn 0.6s ease-out;
+}
+
+/* --- 計分板 --- */
+#status-bar {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    gap: 10px; 
+}
+
+/* 【美觀更新】 計分板 (Soft UI) */
+.score-box {
+    flex: 1;
+    font-size: 1.1em;
+    font-weight: 700;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background-color: var(--color-bg);
+    color: var(--color-text-light); /* 非啟用時為淺色 */
+    border: none;
+    text-align: center;
+    transition: var(--transition-fast);
+    
+    /* 【美觀更新】 預設為平面 */
+    box-shadow: none;
+}
+
+/* 【美觀更新】 當前玩家計分板 (內凹效果) */
+.score-box.active {
+    opacity: 1;
+    transform: none; /* 移除放大 */
+    background-color: var(--p1-bg);
+    color: var(--p1-color);
+    box-shadow: var(--shadow-inset); /* 內凹 */
+}
+
+.score-box.player2.active {
+    background-color: var(--p2-bg);
+    color: var(--p2-color);
+    box-shadow: var(--shadow-inset);
+}
+.score-box.player3.active {
+    background-color: var(--p3-bg);
+    color: var(--p3-color);
+    box-shadow: var(--shadow-inset);
+}
+.score-box.player4.active {
+    background-color: var(--p4-bg);
+    color: var(--p4-color);
+    box-shadow: var(--shadow-inset);
+}
+
+.score-box.score-pulse {
+    animation: scorePulse 0.4s ease-in-out;
+}
+
+/* 【美觀更新】 畫布 (內凹效果) */
+canvas {
+    background-color: var(--color-bg);
+    border-radius: 12px;
+    /* 【美觀更新】 套用 Soft UI 內凹陰影 */
+    box-shadow: var(--shadow-inset);
+    border: none;
+    cursor: pointer;
+    width: 100%;
+    height: auto;
+    transition: var(--transition-fast);
+    touch-action: manipulation;
+}
+
+/* 【美觀更新】 按鈕 (Soft UI) */
+.btn {
+    font-family: var(--font-main);
+    font-size: 1rem;
+    font-weight: 700;
+    padding: 15px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    width: 100%;
+
+    /* 【美觀更新】 按鈕文字顏色 */
+    color: var(--color-text-light);
+    background-color: var(--color-bg);
+    
+    /* 【美觀更新】 套用 Soft UI 浮雕陰影 */
+    box-shadow: var(--shadow-neumorphic);
+}
+
+/* 【美觀更新】 按鈕 Hover (微調陰影) */
+.btn:hover {
+    transform: none; /* 移除Y軸移動 */
+    box-shadow: 
+        calc(var(--shadow-distance) * 1.2) calc(var(--shadow-distance) * 1.2) calc(var(--shadow-blur) * 1.2) var(--shadow-color-dark),
+        calc(var(--shadow-distance) * -1.2) calc(var(--shadow-distance) * -1.2) calc(var(--shadow-blur) * 1.2) var(--shadow-color-light);
+}
+
+/* 【美觀更新】 按鈕 Active (內凹效果) */
+.btn:active {
+    transform: none; /* 移除Y軸移動 */
+    box-shadow: var(--shadow-inset);
+}
+
+/* 【美觀更新】 按鈕顏色改為只套用文字 */
+.btn.primary { color: var(--btn-primary); }
+.btn.success { color: var(--btn-success); }
+.btn.danger  { color: var(--btn-danger); }
+
+/* 按鈕按下時，文字顏色變深 */
+.btn.primary:active { color: #2980b9; }
+.btn.success:active { color: #27ae60; }
+.btn.danger:active { color: #c0392b; }
+
+
+/* --- 按鈕控制區 (相同) --- */
+#action-bar {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+    flex-direction: column;
+    transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
+    opacity: 0;
+    transform: translateY(10px);
+    visibility: hidden;
+    pointer-events: none;
+}
+
+#action-bar.visible {
+    opacity: 1;
+    transform: translateY(0);
+    visibility: visible;
+    pointer-events: auto;
+}
+
+/* 遊戲控制區 */
+#game-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+}
+
+/* 【美觀更新】 控制群組 (Soft UI) */
+.control-group {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background-color: var(--color-bg);
+    padding: 10px 15px;
+    border-radius: 8px;
+    /* 【美觀更新】 讓控制區塊也浮雕 */
+    box-shadow: var(--shadow-neumorphic);
+}
+
+.control-group label {
+    font-weight: 600;
+    color: var(--color-text);
+}
+
+/* 【美觀更新】 數字輸入框 (內凹效果) */
+#draw-length-input,
+#player-count-input {
+    font-family: var(--font-main);
+    font-size: 1rem;
+    font-weight: 700;
+    width: 60px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: none;
+    text-align: center;
+    
+    /* 【美觀更新】 基礎樣式 */
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    box-shadow: var(--shadow-inset);
+    transition: var(--transition-fast);
+    /* 移除 input number 預設箭頭 (非必要) */
+    -moz-appearance: textfield;
+}
+#draw-length-input::-webkit-outer-spin-button,
+#draw-length-input::-webkit-inner-spin-button,
+#player-count-input::-webkit-outer-spin-button,
+#player-count-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+
+#draw-length-input:focus,
+#player-count-input:focus {
+    outline: none;
+    /* 【美觀更新】 focus 時陰影反轉 (浮雕) */
+    box-shadow: var(--shadow-neumorphic);
+}
+
+#draw-length-input:disabled,
+#player-count-input:disabled {
+    background-color: var(--color-bg-dark);
+    color: var(--color-text-light);
+    box-shadow: var(--shadow-inset);
+    cursor: not-allowed;
+}
+
+
+/* --- 遊戲結束 Modal (相同) --- */
+#modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    
+    /* 【美觀更新】 配合背景改為更柔和的遮罩 */
+    background: rgba(238, 240, 244, 0.5); /* 柔和的米白遮罩 */
+    @supports (backdrop-filter: blur(5px)) or (-webkit-backdrop-filter: blur(5px)) {
+        background: rgba(238, 240, 244, 0.3); /* 支援時更透明 */
+        backdrop-filter: blur(5px);
+        -webkit-backdrop-filter: blur(5px);
+    }
+    
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    animation: modalFadeIn 0.3s ease;
+}
+
+/* ... (confetti, keyframes ... ) ... */
+#confetti-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 101;
+}
+.confetti {
+    position: absolute;
+    width: 10px;
+    height: 20px;
+    background-color: #f39c12;
+    top: -50px;
+    opacity: 0.9;
+    animation: fall 5s linear forwards, 
+                 rotate 3s infinite ease-in-out;
+}
+@keyframes fall {
+    from {
+        transform: translateY(0) rotate(0);
+    }
+    to {
+        transform: translateY(110vh) rotate(720deg);
+        opacity: 0;
+    }
+}
+@keyframes rotate {
+    0%, 100% {
+        transform: translateX(0) rotateZ(0);
+    }
+    50% {
+        transform: translateX(20px) rotateZ(180deg);
+    }
+}
+
+/* 【美觀更新】 結束訊息 (Soft UI) */
+#game-over-message {
+    background: var(--color-bg); /* 配合背景 */
+    padding: 40px 50px;
+    border-radius: 20px;
+    box-shadow: var(--shadow-neumorphic); /* 浮雕效果 */
+    text-align: center;
+    animation: fadeIn 0.3s ease-out; 
+    position: relative; 
+    z-index: 102;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+#winner-text {
+    display: block;
+    font-size: 1.8em;
+    font-weight: 700;
+    color: var(--color-text);
+    margin-bottom: 25px; 
+}
+
+#reset-button-modal {
+    width: 100%; 
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* --- 【修改】 媒體查詢 (補回桌機版樣式) --- */
+@media (min-width: 768px) {
+    /* 恢復桌機版 body 邊距 */
+    body {
+        padding: 40px 20px;
+    }
+
+    /* 恢復桌機版 h1 字體 */
+    h1 {
+        font-size: 2.8rem;
+    }
+    
+    /* 恢復桌機版 game-container 邊距 */
+    #game-container {
+        padding: 30px;
+        /* 【美觀更新】 桌機版陰影可以更深 */
+        --shadow-distance: 8px;
+        --shadow-blur: 16px;
+        border-radius: 25px;
+    }
+
+    #action-bar {
+        flex-direction: row;
+        justify-content: center; 
+    }
+    
+    /* 遊戲控制區 */
+    #game-controls {
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .control-group {
+        /* 【美觀更新】 桌機版控制區塊改為平面, 融入背景 */
+        background: transparent;
+        box-shadow: none;
+    }
+    
+    .btn {
+        width: auto; 
+    }
+    
+    /* 計分板 */
+    .score-box {
+        font-size: 1.15em;
+        padding: 12px 15px;
+        border-radius: 12px;
+    }
+    #status-bar {
+        gap: 20px;
+    }
+    
+    /* 畫布 */
+    canvas {
+        border-radius: 15px;
+    }
+}

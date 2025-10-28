@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>點點圍三角加入電腦對戰</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="style.css" >
+</head>
+<body>
+
+    <h1>點點圍三角加入電腦對戰</h1>
+
+    <div id="game-container">
+        
+        <div id="status-bar">
+            </div>
+
+        <canvas id="game-canvas"></canvas>
+
+        <div id="action-bar">
+            <button id="confirm-line-button" class="btn primary">確認連線</button>
+            <button id="cancel-line-button" class="btn danger">取消選取</button>
+        </div>
+
+        <div id="game-controls">
+            <div class="control-group">
+                <label for="draw-length-input">限制長度:</label>
+                <input type="number" id="draw-length-input" value="1" min="1" max="10">
+            </div>
+            
+            <div class="control-group">
+                <label for="player-count-input">玩家人數:</label>
+                <input type="number" id="player-count-input" value="2" min="1" max="4">
+            </div>
+            
+            <button id="reset-button" class="btn success">重新開始</button>
+        </div>
+    </div>
+
+    <div id="modal-overlay" class="hidden">
+        
+        <div id="confetti-container"></div>
+        
+        <div id="game-over-message">
+            <span id="winner-text"></span>
+            <button id="reset-button-modal" class="btn success">重新開始</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
